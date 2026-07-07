@@ -34,7 +34,6 @@
         .header-right { display: flex; align-items: center; gap: 15px; }
         .role-badge { background: #E6F4F1; color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
         
-        /* ปุ่ม Log out สีแดงเรียบหรูขวาบน */
         .btn-logout { background: #FEE2E2; color: var(--danger); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; width: auto; transition: all 0.2s; }
         .btn-logout:hover { background: var(--danger); color: white; }
         
@@ -53,10 +52,15 @@
         .badge-status { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; user-select: none; text-align: center; display: inline-block; }
         .badge-active { background: #E6F4F1; color: var(--primary); border: 1px solid #CCFBF1; }
         .badge-inactive { background: #FEE2E2; color: #DC2626; border: 1px solid #FEE2E2; }
-        .btn-edit { background: #F1F5F9; color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; width: auto; display: inline-block; }
+        
+        .action-btns { display: flex; gap: 6px; }
+        .btn-edit { background: #F1F5F9; color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; width: auto; display: inline-block; border: none; cursor: pointer;}
         .btn-edit:hover { background: #E2E8F0; }
         
-        /* บันทึกกิจกรรม */
+        /* 🌟 ปุ่มลบสีแดง */
+        .btn-delete { background: #FEE2E2; color: #DC2626; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; width: auto; display: inline-block; border: none; cursor: pointer;}
+        .btn-delete:hover { background: #FCA5A5; color: #991B1B; }
+        
         .log-list { max-height: 180px; overflow-y: auto; font-size: 0.88rem; line-height: 1.6; }
         .log-item { padding: 8px 12px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; }
         .log-item:last-child { border-bottom: none; }
@@ -72,7 +76,6 @@
 
     <div id="sync-indicator">🔄 กำลังอัปเดตระบบ...</div>
 
-    <!-- 🔒 หน้าจอล็อกระบบความปลอดภัย -->
     <div id="lockScreen" class="lock-container">
         <div class="lock-card">
             <h2>ระบบจัดการคูปอง</h2>
@@ -82,7 +85,6 @@
         </div>
     </div>
 
-    <!-- 🖥️ หน้าจอหลัก CONTROL DASHBOARD -->
     <div id="appScreen" class="app-container">
         <div class="app-header">
             <h1>Coupon Control Center</h1>
@@ -93,7 +95,6 @@
         </div>
         
         <div class="main-grid">
-            <!-- ฟอร์มสร้าง/แก้ไขคูปอง -->
             <div class="form-card">
                 <h3 id="formTitle">สร้างคูปองใหม่</h3>
                 <form id="couponForm" onsubmit="saveCoupon(event)">
@@ -142,7 +143,6 @@
                 </form>
             </div>
             
-            <!-- ตารางรายการคูปอง -->
             <div class="list-card">
                 <h3>รายการคูปองทั้งหมดใน Google Sheet</h3>
                 <div class="table-wrapper">
@@ -167,7 +167,6 @@
             </div>
         </div>
 
-        <!-- 🌟 แถบประวัติกิจกรรม (Activity Logs) ดึงกลับมาแสดงผลเรียบร้อยแล้ว -->
         <div class="log-card">
             <h3>ประวัติการทำรายการ (บันทึกย้อนหลังในเซสชั่นนี้)</h3>
             <div id="logList" class="log-list">
@@ -184,6 +183,7 @@
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwByVyg6iww8_ZEwGpjmR16tldz-Fy6HtIl1A-J6WThLrxFJpq_c-f0vTCvWS9yHDdxbw/exec";
         
         let CURRENT_USER_NAME = "";
+        let REFRESH_INTERVAL_ID = null;
 
         // 🔐 1. ยืนยันสิทธิ์ PIN
         function verifyAccess() {
@@ -200,6 +200,9 @@
                     
                     addLog("เข้าสู่ระบบควบคุมสำเร็จ");
                     loadCoupons();
+                    
+                    // 🌟 เพิ่มระบบดึงข้อมูลอัปเดตพื้นหลังแบบเรียลไทม์ (ทุก 15 วินาที)
+                    REFRESH_INTERVAL_ID = setInterval(loadCoupons, 15000);
                 } else {
                     alert(res.msg);
                 }
@@ -209,6 +212,7 @@
         // 🔓 2. ออกจากระบบ (Log Out)
         function logOutSystem() {
             if(confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
+                if(REFRESH_INTERVAL_ID) clearInterval(REFRESH_INTERVAL_ID); // ปิดการ Auto-Sync
                 CURRENT_USER_NAME = "";
                 document.getElementById('pinInput').value = "";
                 document.getElementById('lockScreen').style.display = 'flex';
@@ -220,7 +224,9 @@
 
         // 📦 3. ดึงคูปองจากสเปรดชีต
         function loadCoupons() {
+            document.getElementById('sync-indicator').style.display = 'block';
             callAPI(`${GAS_URL}?action=getCoupons`, function(res) {
+                document.getElementById('sync-indicator').style.display = 'none';
                 if(res.status === "success") {
                     let html = "";
                     res.data.forEach(c => {
@@ -234,7 +240,12 @@
                                 <td>${c.limit || 'ไม่จำกัด'}</td>
                                 <td>${c.exp || '-'}</td>
                                 <td><span class="badge-status ${statusClass}" onclick="toggleStatus('${c.code}', '${c.status}')">${c.status}</span></td>
-                                <td><button class="btn-edit" onclick="editCoupon(${JSON.stringify(c).replace(/"/g, '&quot;')})">แก้ไข</button></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button class="btn-edit" onclick="editCoupon(${JSON.stringify(c).replace(/"/g, '&quot;')})">แก้ไข</button>
+                                        <button class="btn-delete" onclick="deleteCoupon('${c.code}')">ลบ</button>
+                                    </div>
+                                </td>
                             </tr>
                         `;
                     });
@@ -289,7 +300,7 @@
                 document.getElementById('sync-indicator').style.display = 'none';
                 if(res.status === "success") {
                     alert("บันทึกคูปองสำเร็จ!");
-                    addLog(logActionText); // บันทึกชื่อผู้ทำรายการลงกล่องประวัติ
+                    addLog(logActionText);
                     resetForm();
                     loadCoupons();
                 } else {
@@ -298,20 +309,39 @@
             });
         }
 
-        // 🔄 5. สลับสถานะ เปิด/ปิด คูปอง
+        // 🗑️ 5. ฟังก์ชันลบคูปอง
+        function deleteCoupon(code) {
+            if(confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบคูปองรหัส [${code}] นี้ออกจากระบบ?`)) {
+                document.getElementById('sync-indicator').style.display = 'block';
+                let url = `${GAS_URL}?action=deleteCoupon&code=${encodeURIComponent(code)}`;
+                
+                callAPI(url, function(res) {
+                    document.getElementById('sync-indicator').style.display = 'none';
+                    if(res.status === "success") {
+                        addLog(`ลบคูปอง [${code}] ออกจากระบบ`);
+                        loadCoupons();
+                        resetForm();
+                    } else {
+                        alert("เกิดข้อผิดพลาด: " + res.msg);
+                    }
+                });
+            }
+        }
+
+        // 🔄 6. สลับสถานะ เปิด/ปิด คูปอง
         function toggleStatus(code, currentStatus) {
             document.getElementById('sync-indicator').style.display = 'block';
             let url = `${GAS_URL}?action=toggleCouponStatus&code=${encodeURIComponent(code)}&currentStatus=${encodeURIComponent(currentStatus)}`;
             callAPI(url, function(res) {
                 document.getElementById('sync-indicator').style.display = 'none';
                 if(res.status === "success") {
-                    addLog(`เปลี่ยนสถานะคูปอง [${code}] เป็น -> ${res.newStatus}`); // บันทึกประวัติ
+                    addLog(`เปลี่ยนสถานะคูปอง [${code}] เป็น -> ${res.newStatus}`);
                     loadCoupons();
                 }
             });
         }
 
-        // ✏️ 6. เรียกโหมดแก้ไขข้อมูล
+        // ✏️ 7. เรียกโหมดแก้ไขข้อมูล
         function editCoupon(c) {
             document.getElementById('formTitle').innerText = "แก้ไขข้อมูลคูปอง: " + c.code;
             document.getElementById('c_code').value = c.code;
@@ -345,7 +375,7 @@
             document.getElementById('exp_date_zone').style.display = 'none';
         }
 
-        // 📝 7. ฟังก์ชันพิมพ์รายชื่อและบันทึกประวัติลงกล่อง Log
+        // 📝 8. ฟังก์ชันพิมพ์รายชื่อและบันทึกประวัติลงกล่อง Log
         function addLog(actionDescription) {
             let logList = document.getElementById('logList');
             if(logList.innerHTML.includes("ยังไม่มีประวัติกิจกรรม")) {
