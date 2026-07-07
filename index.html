@@ -7,14 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #F8FAFC;
-            --card: #FFFFFF;
-            --primary: #00796B;
-            --primary-hover: #004D40;
-            --text: #0F172A;
-            --text-muted: #64748B;
-            --border: #E2E8F0;
-            --danger: #DC2626;
+            --bg: #F8FAFC; --card: #FFFFFF; --primary: #00796B; --primary-hover: #004D40;
+            --text: #0F172A; --text-muted: #64748B; --border: #E2E8F0; --danger: #DC2626;
         }
         body { font-family: 'Prompt', sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 0; }
         .lock-container { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; box-sizing: border-box; }
@@ -26,55 +20,61 @@
         button { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: background 0.2s; }
         button:hover { background: var(--primary-hover); }
         
-        /* Dashboard Layout */
-        .app-container { display: none; max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+        .app-container { display: none; max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
         .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
         .app-header h1 { margin: 0; font-size: 1.5rem; color: var(--primary); }
-        
         .header-right { display: flex; align-items: center; gap: 15px; }
         .role-badge { background: #E6F4F1; color: var(--primary); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 600; text-transform: uppercase; }
-        
         .btn-logout { background: #FEE2E2; color: var(--danger); padding: 6px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 500; width: auto; transition: all 0.2s; }
         .btn-logout:hover { background: var(--danger); color: white; }
         
         .main-grid { display: grid; grid-template-columns: 1fr; gap: 25px; margin-bottom: 25px; }
-        @media (min-width: 768px) { .main-grid { grid-template-columns: 340px 1fr; } }
+        @media (min-width: 900px) { .main-grid { grid-template-columns: 340px 1fr; } }
         
         .form-card, .list-card, .log-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); }
         .form-card h3, .list-card h3, .log-card h3 { margin: 0 0 20px 0; font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
         
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; }
-        th { background: #F8FAFC; padding: 12px; font-weight: 500; border-bottom: 2px solid var(--border); }
-        td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
-        .coupon-img { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; background: #F1F5F9; }
+        /* 🌟 ระบบตารางที่คอลัมน์หลังสุดล็อกติดจอแก้ปัญหาบนแท็บเล็ต/มือถือ */
+        .table-wrapper { overflow-x: auto; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; white-space: nowrap; }
+        th, td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        th { background: #F8FAFC; font-weight: 500; border-bottom: 2px solid var(--border); }
         
+        th:last-child, td:last-child {
+            position: sticky;
+            right: 0;
+            background-color: var(--card);
+            border-left: 1px solid var(--border);
+            box-shadow: -2px 0 5px rgba(0,0,0,0.03);
+        }
+        th:last-child { background-color: #F8FAFC; z-index: 2; }
+        
+        .coupon-img { width: 45px; height: 45px; border-radius: 6px; object-fit: cover; background: #F1F5F9; }
         .badge-status { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 600; cursor: pointer; user-select: none; text-align: center; display: inline-block; }
         .badge-active { background: #E6F4F1; color: var(--primary); border: 1px solid #CCFBF1; }
         .badge-inactive { background: #FEE2E2; color: #DC2626; border: 1px solid #FEE2E2; }
         
-        .action-btns { display: flex; gap: 6px; }
-        .btn-edit { background: #F1F5F9; color: var(--text); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; width: auto; display: inline-block; border: none; cursor: pointer;}
-        .btn-edit:hover { background: #E2E8F0; }
+        /* จัดเรียงปุ่มลบให้อยู่แนวตั้งบนมือถือและแนวนอนบนคอม */
+        .action-btns { display: flex; gap: 6px; flex-direction: column; }
+        @media (min-width: 576px) { .action-btns { flex-direction: row; } }
         
-        /* 🌟 ปุ่มลบสีแดง */
-        .btn-delete { background: #FEE2E2; color: #DC2626; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; width: auto; display: inline-block; border: none; cursor: pointer;}
+        .btn-edit { background: #F1F5F9; color: var(--text); padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; width: auto; border: none; cursor: pointer;}
+        .btn-edit:hover { background: #E2E8F0; }
+        .btn-delete { background: #FEE2E2; color: #DC2626; padding: 6px 10px; border-radius: 4px; font-size: 0.8rem; width: auto; border: none; cursor: pointer;}
         .btn-delete:hover { background: #FCA5A5; color: #991B1B; }
         
-        .log-list { max-height: 180px; overflow-y: auto; font-size: 0.88rem; line-height: 1.6; }
-        .log-item { padding: 8px 12px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; }
-        .log-item:last-child { border-bottom: none; }
+        .log-list { max-height: 250px; overflow-y: auto; font-size: 0.88rem; line-height: 1.6; }
+        .log-item { padding: 10px 12px; border-bottom: 1px solid #F1F5F9; display: flex; justify-content: space-between; align-items: flex-start; }
         .log-user { font-weight: 600; color: var(--primary); }
-        .log-time { color: var(--text-muted); font-size: 0.8rem; }
+        .log-time { color: var(--text-muted); font-size: 0.75rem; text-align: right; min-width: 80px; }
         
         .footer { text-align: center; padding: 24px 20px; font-size: 0.78rem; color: var(--text-muted); border-top: 1px solid #E2E8F0; background-color: var(--card); flex-shrink: 0; }
-        .footer span { color: var(--primary); font-weight: 600; }
         #sync-indicator { position: fixed; top: 12px; right: 12px; background: rgba(0, 121, 107, 0.9); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.72rem; font-weight: 500; display: none; z-index: 99999; }
     </style>
 </head>
 <body>
 
-    <div id="sync-indicator">🔄 กำลังอัปเดตระบบ...</div>
+    <div id="sync-indicator">🔄 กำลังซิงค์ข้อมูล...</div>
 
     <div id="lockScreen" class="lock-container">
         <div class="lock-card">
@@ -144,7 +144,7 @@
             </div>
             
             <div class="list-card">
-                <h3>รายการคูปองทั้งหมดใน Google Sheet</h3>
+                <h3>รายการคูปองทั้งหมด</h3>
                 <div class="table-wrapper">
                     <table>
                         <thead>
@@ -168,9 +168,9 @@
         </div>
 
         <div class="log-card">
-            <h3>ประวัติการทำรายการ (บันทึกย้อนหลังในเซสชั่นนี้)</h3>
+            <h3>ประวัติการทำรายการ (บันทึกถาวรลง Database)</h3>
             <div id="logList" class="log-list">
-                <div style="text-align:center; color:var(--text-muted); padding:10px;">ยังไม่มีประวัติกิจกรรมในเซสชั่นนี้</div>
+                <div style="text-align:center; color:var(--text-muted); padding:10px;">กำลังโหลดประวัติ...</div>
             </div>
         </div>
     </div>
@@ -180,12 +180,12 @@
     </div>
 
     <script>
+        // 🔗 วางลิงก์เว็บแอปคูปองของคุณตรงนี้
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwByVyg6iww8_ZEwGpjmR16tldz-Fy6HtIl1A-J6WThLrxFJpq_c-f0vTCvWS9yHDdxbw/exec";
         
         let CURRENT_USER_NAME = "";
         let REFRESH_INTERVAL_ID = null;
 
-        // 🔐 1. ยืนยันสิทธิ์ PIN
         function verifyAccess() {
             let pin = document.getElementById('pinInput').value;
             if(!pin) return alert("กรุณากรอกรหัส PIN");
@@ -198,31 +198,31 @@
                     CURRENT_USER_NAME = res.role === 'admin' ? '🛡️ Admin' : `🤵 ช่าง ${res.name}`;
                     document.getElementById('userBadge').innerText = CURRENT_USER_NAME;
                     
-                    addLog("เข้าสู่ระบบควบคุมสำเร็จ");
-                    loadCoupons();
-                    
-                    // 🌟 เพิ่มระบบดึงข้อมูลอัปเดตพื้นหลังแบบเรียลไทม์ (ทุก 15 วินาที)
-                    REFRESH_INTERVAL_ID = setInterval(loadCoupons, 15000);
+                    loadDataFromDatabase();
+                    REFRESH_INTERVAL_ID = setInterval(loadDataFromDatabase, 15000);
                 } else {
                     alert(res.msg);
                 }
             });
         }
 
-        // 🔓 2. ออกจากระบบ (Log Out)
         function logOutSystem() {
             if(confirm("คุณต้องการออกจากระบบใช่หรือไม่?")) {
-                if(REFRESH_INTERVAL_ID) clearInterval(REFRESH_INTERVAL_ID); // ปิดการ Auto-Sync
+                if(REFRESH_INTERVAL_ID) clearInterval(REFRESH_INTERVAL_ID); 
                 CURRENT_USER_NAME = "";
                 document.getElementById('pinInput').value = "";
                 document.getElementById('lockScreen').style.display = 'flex';
                 document.getElementById('appScreen').style.display = 'none';
-                document.getElementById('logList').innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:10px;">ยังไม่มีประวัติกิจกรรมในเซสชั่นนี้</div>`;
                 resetForm();
             }
         }
 
-        // 📦 3. ดึงคูปองจากสเปรดชีต
+        // โหลดข้อมูลคู่กัน (คูปอง + ประวัติ)
+        function loadDataFromDatabase() {
+            loadCoupons();
+            loadLogs();
+        }
+
         function loadCoupons() {
             document.getElementById('sync-indicator').style.display = 'block';
             callAPI(`${GAS_URL}?action=getCoupons`, function(res) {
@@ -254,6 +254,26 @@
             });
         }
 
+        // 📜 ดึงประวัติถาวรจาก Database
+        function loadLogs() {
+            callAPI(`${GAS_URL}?action=getLogs`, function(res) {
+                if(res.status === "success" && res.data.length > 0) {
+                    let html = "";
+                    res.data.forEach(log => {
+                        html += `
+                            <div class="log-item">
+                                <div>ทำรายการ: <span class="log-user">${log.user}</span> ➔ <span style="color:#0F172A; font-weight:500;">${log.desc}</span></div>
+                                <div class="log-time">⏱️ ${log.time}</div>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('logList').innerHTML = html;
+                } else {
+                    document.getElementById('logList').innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:10px;">ยังไม่มีประวัติในระบบ</div>';
+                }
+            });
+        }
+
         function handleExpTypeChange() {
             let type = document.getElementById('c_exp_type').value;
             if(type === 'fixed') {
@@ -265,7 +285,6 @@
             }
         }
 
-        // 💾 4. บันทึก / แก้ไขคูปอง
         function saveCoupon(e) {
             e.preventDefault();
             document.getElementById('sync-indicator').style.display = 'block';
@@ -279,69 +298,46 @@
             let status = document.getElementById('c_status').value;
             
             let expType = document.getElementById('c_exp_type').value;
-            let exp = "";
-            if(expType === 'fixed') {
-                let dateVal = document.getElementById('c_exp_date').value;
-                if(!dateVal) {
-                    document.getElementById('sync-indicator').style.display = 'none';
-                    return alert("กรุณากรอกวันที่บนปฏิทิน");
-                }
-                exp = dateVal;
-            } else {
-                exp = document.getElementById('c_exp_text').value || "ภายใน 14 วันหลังกดรับ";
-            }
+            let exp = (expType === 'fixed') ? document.getElementById('c_exp_date').value : (document.getElementById('c_exp_text').value || "ภายใน 14 วันหลังกดรับ");
+            if(expType === 'fixed' && !exp) { document.getElementById('sync-indicator').style.display = 'none'; return alert("กรุณากรอกวันที่"); }
             
-            let isEditMode = document.getElementById('c_code').disabled;
-            let logActionText = isEditMode ? `แก้ไขคูปอง [${code}]` : `สร้างคูปองใหม่ [${code}]`;
-            
-            let url = `${GAS_URL}?action=saveCoupon&code=${encodeURIComponent(code)}&title=${encodeURIComponent(title)}&desc=${encodeURIComponent(desc)}&points=${encodeURIComponent(points)}&imgUrl=${encodeURIComponent(imgUrl)}&limit=${encodeURIComponent(limit)}&exp=${encodeURIComponent(exp)}&status=${encodeURIComponent(status)}`;
+            // ส่งชื่อแอดมินไปบันทึกลง Database ด้วย
+            let url = `${GAS_URL}?action=saveCoupon&code=${encodeURIComponent(code)}&title=${encodeURIComponent(title)}&desc=${encodeURIComponent(desc)}&points=${encodeURIComponent(points)}&imgUrl=${encodeURIComponent(imgUrl)}&limit=${encodeURIComponent(limit)}&exp=${encodeURIComponent(exp)}&status=${encodeURIComponent(status)}&user=${encodeURIComponent(CURRENT_USER_NAME)}`;
             
             callAPI(url, function(res) {
                 document.getElementById('sync-indicator').style.display = 'none';
                 if(res.status === "success") {
                     alert("บันทึกคูปองสำเร็จ!");
-                    addLog(logActionText);
                     resetForm();
-                    loadCoupons();
-                } else {
-                    alert("เกิดข้อผิดพลาด: " + res.msg);
-                }
+                    loadDataFromDatabase(); // โหลดใหม่ทั้งตารางและประวัติ
+                } else alert("เกิดข้อผิดพลาด: " + res.msg);
             });
         }
 
-        // 🗑️ 5. ฟังก์ชันลบคูปอง
         function deleteCoupon(code) {
-            if(confirm(`คุณแน่ใจหรือไม่ว่าต้องการลบคูปองรหัส [${code}] นี้ออกจากระบบ?`)) {
+            if(confirm(`ยืนยันการลบคูปองรหัส [${code}] ถาวร?`)) {
                 document.getElementById('sync-indicator').style.display = 'block';
-                let url = `${GAS_URL}?action=deleteCoupon&code=${encodeURIComponent(code)}`;
+                let url = `${GAS_URL}?action=deleteCoupon&code=${encodeURIComponent(code)}&user=${encodeURIComponent(CURRENT_USER_NAME)}`;
                 
                 callAPI(url, function(res) {
                     document.getElementById('sync-indicator').style.display = 'none';
                     if(res.status === "success") {
-                        addLog(`ลบคูปอง [${code}] ออกจากระบบ`);
-                        loadCoupons();
+                        loadDataFromDatabase();
                         resetForm();
-                    } else {
-                        alert("เกิดข้อผิดพลาด: " + res.msg);
-                    }
+                    } else alert("เกิดข้อผิดพลาด: " + res.msg);
                 });
             }
         }
 
-        // 🔄 6. สลับสถานะ เปิด/ปิด คูปอง
         function toggleStatus(code, currentStatus) {
             document.getElementById('sync-indicator').style.display = 'block';
-            let url = `${GAS_URL}?action=toggleCouponStatus&code=${encodeURIComponent(code)}&currentStatus=${encodeURIComponent(currentStatus)}`;
+            let url = `${GAS_URL}?action=toggleCouponStatus&code=${encodeURIComponent(code)}&currentStatus=${encodeURIComponent(currentStatus)}&user=${encodeURIComponent(CURRENT_USER_NAME)}`;
             callAPI(url, function(res) {
                 document.getElementById('sync-indicator').style.display = 'none';
-                if(res.status === "success") {
-                    addLog(`เปลี่ยนสถานะคูปอง [${code}] เป็น -> ${res.newStatus}`);
-                    loadCoupons();
-                }
+                if(res.status === "success") loadDataFromDatabase();
             });
         }
 
-        // ✏️ 7. เรียกโหมดแก้ไขข้อมูล
         function editCoupon(c) {
             document.getElementById('formTitle').innerText = "แก้ไขข้อมูลคูปอง: " + c.code;
             document.getElementById('c_code').value = c.code;
@@ -375,35 +371,10 @@
             document.getElementById('exp_date_zone').style.display = 'none';
         }
 
-        // 📝 8. ฟังก์ชันพิมพ์รายชื่อและบันทึกประวัติลงกล่อง Log
-        function addLog(actionDescription) {
-            let logList = document.getElementById('logList');
-            if(logList.innerHTML.includes("ยังไม่มีประวัติกิจกรรม")) {
-                logList.innerHTML = "";
-            }
-            let now = new Date();
-            let timeString = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-            
-            let logHTML = `
-                <div class="log-item">
-                    <div>ทำรายการโดย: <span class="log-user">${CURRENT_USER_NAME}</span> ➔ <span style="color:#0F172A; font-weight:500;">${actionDescription}</span></div>
-                    <div class="log-time">⏱️ ${timeString} น.</div>
-                </div>
-            `;
-            logList.innerHTML = logHTML + logList.innerHTML;
-        }
-
-        // JSONP Call
         function callAPI(url, callbackName) {
             let callbackFunctionName = 'coupon_cb_' + Math.floor(Math.random() * 100000);
-            window[callbackFunctionName] = function(data) {
-                callbackName(data);
-                delete window[callbackFunctionName];
-                document.body.removeChild(script);
-            };
-            let script = document.createElement('script');
-            script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + callbackFunctionName;
-            document.body.appendChild(script);
+            window[callbackFunctionName] = function(data) { callbackName(data); delete window[callbackFunctionName]; document.body.removeChild(script); };
+            let script = document.createElement('script'); script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + callbackFunctionName; document.body.appendChild(script);
         }
     </script>
 </body>
